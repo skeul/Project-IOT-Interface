@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Adafruit.io</title>
+    <style>
+        #temp {
+            padding: "50px";
+            color: blue;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Interface Adafruit.io</h1>
+    <p><input type="button" value="Allumer la lumière" id="lum" /></p>
+
+    <div id="temp">
+        Récupération des données en cours...
+    </div>
+
+    <div id="humidity">
+        Récupération des données en cours...
+    </div>
+
+    <p>
+        <input type="color" id="color" name="color">
+        <label for="head">Couleur de la lumière</label>
+    </p>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost:8080');
+        var lumButton = 0
+        // socket.emit('btn_push', pseudo);
+
+        socket.on('temp', function (message) {
+            document.getElementById('temp').innerHTML = message + "°C"
+        })
+
+        socket.on('humidity', function (message) {
+            document.getElementById('humidity').innerHTML = message + "%"
+        })
+
+        socket.on('color', function (message) {
+            $('#color').val(message)
+        })
+
+        $(document).ready(function () {
+            $('#lum').click(function () {
+                if (lumButton == 0) {
+                    socket.emit('lumiere', 1)
+                    $(this).val("Eteindre la lumière")
+                    lumButton = 1
+                } else {
+                    socket.emit('lumiere', 0)
+                    $(this).val("Allumer la lumière")
+                    lumButton = 0
+                }
+            })
+
+            $('#color').change(function () {
+                console.log('change color')
+                console.log($(this).val())
+                socket.emit('color', $(this).val());
+            })
+        })
+    </script>
+
+</body>
+
+</html>
