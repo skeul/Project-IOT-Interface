@@ -1,6 +1,7 @@
-var http = require('http');
 var fs = require('fs');
 var conf = require('./config')
+const request = require('request');
+var http = require('http')
 
 // Chargement du fichier index.html affiché au client
 var server = http.createServer(function (req, res) {
@@ -27,6 +28,10 @@ io.sockets.on('connection', function (socket) {
     var options = {
         host: "io.adafruit.com",
         path: '/api/v2/skeul/feeds/temp/data',
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     };
 
     // init du client mqtt adafruit
@@ -56,12 +61,18 @@ io.sockets.on('connection', function (socket) {
         // http.request(options, function (res) {
         //     // console.log('STATUS: ' + res.statusCode);
         //     // console.log('HEADERS: ' + JSON.stringify(res.headers));
-        //     res.setEncoding('utf8');
-
         //     res.on('data', function (chunk) {
+        //         console.log(chunk)
+        //         console.log("a<br>")
         //         socket.emit("temp_history", JSON.stringify(chunk))
         //     });
         // }).end();
+        request('https://io.adafruit.com/api/v2/skeul/feeds/temp/data?start_time=2020-10-01T00:00Z&end_time=2020-10-08&limit=100', function (error, response, body) {
+            console.error('error:', error); // Print the error if one occurred
+            console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+            socket.emit("temp_history", body)
+        });
+
 
         var ret = client.subscribe('skeul/feeds/color')
         console.log(topic)

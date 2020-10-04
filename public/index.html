@@ -30,6 +30,15 @@
             top: 0;
             background: black;
         }
+
+        #table {
+            text-align: center;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 5px 10px;
+        }
     </style>
 </head>
 
@@ -53,11 +62,14 @@
         <input type="button" value="Allumer la lumière" id="lum" />
     </p>
 
-    <!-- <table>
+    <table>
         <thead>
             <tr>
                 <td>
                     Date
+                </td>
+                <td>
+                    Heure
                 </td>
                 <td>
                     Température
@@ -67,7 +79,7 @@
         <tbody id="table">
 
         </tbody>
-    </table> -->
+    </table>
 
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -94,10 +106,16 @@
             document.getElementById('temp').innerHTML = message + "°C"
         })
 
-        // socket.on('temp_history', function (message) {
-        //     console.log(JSON.parse(message))
-        //     $("#table").html("").append('<tr><td>' + message + '</td></tr>')
-        // })
+        socket.on('temp_history', function (message) {
+            var tab = JSON.parse(message)
+            var content_tab = ""
+            $.each(tab, function (key, value) {
+                var date = new Date(value.created_epoch * 1000)
+                content_tab += '<tr><td>' + date.toLocaleDateString() + '</td><td>' + date.toLocaleTimeString() + '</td><td>' + parseFloat(value.value).toFixed(2).toString() + '°C</td ></tr > '
+            });
+
+            $("#table").html(content_tab)
+        })
 
         socket.on('humidity', function (message) {
             document.getElementById('humidity').innerHTML = message + "%"
