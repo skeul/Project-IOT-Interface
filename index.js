@@ -10,11 +10,24 @@ var server = http.createServer(function (req, res) {
     });
 });
 
+
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
 
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (socket) {
+
+    socket.on('user', function (pseudo) {
+        if (pseudo == conf.ADAFRUIT_USER)
+            socket.emit("ok_user", 1)
+        else
+            socket.emit("ok_user", 0)
+    })
+
+    var options = {
+        host: "io.adafruit.com",
+        path: '/api/v2/skeul/feeds/temp/data',
+    };
 
     // init du client mqtt adafruit
     var mqtt = require('mqtt'),
@@ -39,6 +52,16 @@ io.sockets.on('connection', function (socket) {
     });
 
     client.on('message', function (topic, message) {
+
+        // http.request(options, function (res) {
+        //     // console.log('STATUS: ' + res.statusCode);
+        //     // console.log('HEADERS: ' + JSON.stringify(res.headers));
+        //     res.setEncoding('utf8');
+
+        //     res.on('data', function (chunk) {
+        //         socket.emit("temp_history", JSON.stringify(chunk))
+        //     });
+        // }).end();
 
         var ret = client.subscribe('skeul/feeds/color')
         console.log(topic)

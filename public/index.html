@@ -6,39 +6,98 @@
     <title>Adafruit.io</title>
     <style>
         #temp {
-            padding: "50px";
             color: blue;
+        }
+
+        .sensor {
+            display: flex;
+            max-width: 350px;
+        }
+
+        .box {
+            padding: 50px;
+            flex: 1 1 50%;
+            align-items: center;
+            border: 2px solid gray;
+            margin: 5px;
+            font-size: 40px;
+        }
+
+        .black {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            background: black;
         }
     </style>
 </head>
 
 <body>
-    <h1>Interface Adafruit.io</h1>
-    <p><input type="button" value="Allumer la lumière" id="lum" /></p>
+    <h1>Interface Sensor Pysense</h1>
+    <div class="black"></div>
+    <div class="sensor">
+        <div id="temp" class="box">
+            Récupération des données en cours...
+        </div>
 
-    <div id="temp">
-        Récupération des données en cours...
+        <div id="humidity" class="box">
+            Récupération des données en cours...
+        </div>
     </div>
-
-    <div id="humidity">
-        Récupération des données en cours...
-    </div>
-
     <p>
         <input type="color" id="color" name="color">
         <label for="head">Couleur de la lumière</label>
     </p>
+    <p>
+        <input type="button" value="Allumer la lumière" id="lum" />
+    </p>
+
+    <!-- <table>
+        <thead>
+            <tr>
+                <td>
+                    Date
+                </td>
+                <td>
+                    Température
+                </td>
+            </tr>
+        </thead>
+        <tbody id="table">
+
+        </tbody>
+    </table> -->
 
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io.connect('http://localhost:8080');
         var lumButton = 0
-        // socket.emit('btn_push', pseudo);
+        var pseudo = prompt("Merci de rentrer votre nom d'utilisateur");
+        var key = prompt("Merci de rentrer votre IOKEY Adafruit");
+
+        socket.emit('user', (pseudo));
+
+        socket.on('ok_user', function (message) {
+            if (message == 1)
+                $(".black").hide()
+            else {
+                var pseudo = prompt("Merci de rentrer votre nom d'utilisateur");
+                var key = prompt("Merci de rentrer votre IOKEY Adafruit");
+
+                socket.emit('user', (pseudo));
+            }
+        })
 
         socket.on('temp', function (message) {
             document.getElementById('temp').innerHTML = message + "°C"
         })
+
+        // socket.on('temp_history', function (message) {
+        //     console.log(JSON.parse(message))
+        //     $("#table").html("").append('<tr><td>' + message + '</td></tr>')
+        // })
 
         socket.on('humidity', function (message) {
             document.getElementById('humidity').innerHTML = message + "%"
